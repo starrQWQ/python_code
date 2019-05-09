@@ -111,7 +111,11 @@ def mut(new_group):
     n = int(number_of_indiv * pm)
     if n < 1:
         return
+    flag = 0
     while(n):
+        if flag == 100:
+            break
+        
         r1 = randint(0,number_of_indiv - 1)
         r2 = randint(0,number_of_city - 1)
         r3 = randint(0,number_of_city - 1)
@@ -126,7 +130,8 @@ def mut(new_group):
             del(new_group[r1])
             new_group.append(new_indiv)
             n -= 1
-            
+        else:
+            flag += 1
         
         
 def search_bestroute(group):
@@ -138,8 +143,19 @@ def search_bestroute(group):
             bestroute[0] = indiv.get_seq().copy()
             bestroute[1] = fit
             bestroute[2] = indiv.get_dis()
+
+def choose_first_city():
+    for i in range(number_of_city):
+        print("%2d.%-8s"%(i+1,cities[i].name),end = '')
+        if (i+1) % 2 == 0:
+            print()
+    while(True):
+        choice = int(input("start from:"))
+        if 0 <= choice < number_of_city:
+            break
     
 
+    return choice
 
 if __name__ == "__main__":
     global cities
@@ -148,7 +164,7 @@ if __name__ == "__main__":
     global pm
     global bestroute
     
-    cities = loadfile("data.txt")
+    cities = loadfile("data.txt") # [name,lon,lat]
     number_of_indiv = 100
     pc = 0.01
     pm = 0.1
@@ -160,7 +176,8 @@ if __name__ == "__main__":
 #        print(cities[i].name,end=',')
 #    print()
     
-    
+    start_city = choose_first_city()
+#    print(cities[start].name)
     
     group = init_group(number_of_city);
 #    for individual in group:
@@ -168,7 +185,7 @@ if __name__ == "__main__":
 #            print(cities[i].name,end=',')
 #        print('\n')
     
-    bestroute = [[],0,0]    #[route,fit,distance]
+    bestroute = [[],0,0]    #[route list,fit,distance]
     search_bestroute(group)
     times = int(input("how many generations?:"))
     new_group = group
@@ -188,24 +205,35 @@ if __name__ == "__main__":
         del(tmp)
         times -= 1
         
-    plt.xlim(90,130)
-    plt.ylim(20,50)
+    plt.xlim(80,130)
+    plt.ylim(15,50)
     x = []
     y = []
     
-    for i in bestroute[0]:
+    start_index = bestroute[0].index(start_city)
+#    print(cities[bestroute[0][start_index]].name)
+    
+    flag = number_of_city - 1
+#    for i in bestroute[0]:
+    index = start_index
+    while(flag):
 #        print(cities[i].name,end = ',')
 #        print()
 #        print("distance:",bestroute[2])
+        
+        i = bestroute[0][index]
         x.append(cities[i].lon)
         y.append(cities[i].lat)
-        
         
         plt.rcParams['font.sans-serif']=['SimHei']
         plt.rcParams['axes.unicode_minus']=False
         plt.text(cities[i].lon,cities[i].lat,cities[i].name)
+                
+        index = (index + 1) % number_of_city
+        flag -= 1
+    
     plt.plot(x,y,'go-')
-    plt.text(120,23,str(bestroute[2]) + 'km')
+    plt.text(115,13,str(bestroute[2]) + 'km')
     
 
 
