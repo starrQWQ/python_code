@@ -111,15 +111,23 @@ def mut(new_group):
     n = int(number_of_indiv * pm)
     if n < 1:
         return
-    for i in range(n):
+    while(n):
         r1 = randint(0,number_of_indiv - 1)
         r2 = randint(0,number_of_city - 1)
         r3 = randint(0,number_of_city - 1)
         
-        city_seq = new_group[r1].get_seq()
-        city_seq[r2] ^= city_seq[r3]
-        city_seq[r3] ^= city_seq[r2]
-        city_seq[r2] ^= city_seq[r3]
+        city_seq = new_group[r1].get_seq().copy()
+        tmp = city_seq[r2]
+        city_seq[r2] = city_seq[r3]
+        city_seq[r3] = tmp
+        
+        new_indiv = Individual(city_seq,cities)
+        if new_indiv.get_fit() > new_group[r1].get_fit():
+            del(new_group[r1])
+            new_group.append(new_indiv)
+            n -= 1
+            
+        
         
 def search_bestroute(group):
     global bestroute
@@ -142,8 +150,8 @@ if __name__ == "__main__":
     
     cities = loadfile("data.txt")
     number_of_indiv = 100
-    pc = 0.75
-    pm = 0.01
+    pc = 0.01
+    pm = 0.1
     
     number_of_city = len(cities)
     #   number_of_city : number of cities
@@ -197,7 +205,7 @@ if __name__ == "__main__":
         plt.rcParams['axes.unicode_minus']=False
         plt.text(cities[i].lon,cities[i].lat,cities[i].name)
     plt.plot(x,y,'go-')
-    
+    plt.text(120,23,str(bestroute[2]) + 'km')
     
 
 
